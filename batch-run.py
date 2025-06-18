@@ -42,6 +42,9 @@ if __name__ == "__main__":
     parser.add_argument('--extra_pool_cost_fraction', nargs="*", type=float, default=0.4,
                         help='The factor that determines how much an additional pool costs as a fraction of '
                              'the original cost value of the stakeholder. Default is 40%%.')
+    parser.add_argument('--min_pool_cost', nargs="*", type=float, default=0.0,
+                        help='The minimum fixed fee that a pool must charge regardless of chosen cost. '
+                             'Default is 0.')
     parser.add_argument('--stake_distr_source', nargs="?", type=str, default='Pareto',
                         help='The distribution type to use for the initial allocation of stake to the agents.')
     parser.add_argument('--reward_scheme', nargs="?", type=int, default=0, choices=range(4),

@@ -22,7 +22,7 @@ class Simulation(Model):
             self, n=1000, k=100, a0=0.3, stake_distr_source='Pareto', agent_profile_distr=None,
             inactive_stake_fraction=0, inactive_stake_fraction_known=False, relative_utility_threshold=0,
             absolute_utility_threshold=0, seed=None, pareto_param=2.0, max_iterations=1000, cost_min=1e-5,
-            cost_max=1e-4, extra_pool_cost_fraction=0.4, agent_activation_order="random",
+            cost_max=1e-4, extra_pool_cost_fraction=0.4, min_pool_cost=0.0, agent_activation_order="random",
             iterations_after_convergence=10, reward_scheme=0, execution_id='', seq_id=-1, parent_dir='',
             metrics=None, generate_graphs=True, input_from_file=False
     ):
@@ -71,7 +71,7 @@ class Simulation(Model):
 
         other_fields = [
             'n', 'k', 'a0', 'relative_utility_threshold', 'absolute_utility_threshold', 'max_iterations',
-            'extra_pool_cost_fraction', 'agent_activation_order', 'generate_graphs'
+            'extra_pool_cost_fraction', 'min_pool_cost', 'agent_activation_order', 'generate_graphs'
         ]
         multi_phase_params = {}
         for field in other_fields:
@@ -161,6 +161,7 @@ class Simulation(Model):
 
         # Allocate cost to the agents, sampling from a uniform distribution
         cost_distribution = hlp.generate_cost_distr_unfrm(num_agents=self.n, low=cost_min, high=cost_max, seed=seed)
+        cost_distribution = [max(c, self.min_pool_cost) for c in cost_distribution]
 
         agent_profiles = self.random.choices(list(profiles.PROFILE_MAPPING.keys()), k=self.n,
                                              weights=agent_profile_distr)

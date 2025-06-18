@@ -560,6 +560,9 @@ def add_script_arguments(parser):
     parser.add_argument('--extra_pool_cost_fraction', nargs="?", type=non_negative_float, default=0.4,
                         help='The factor that determines how much an additional pool costs as a fraction of '
                              'the original cost value of the stakeholder. Default is 40%%.')
+    parser.add_argument('--min_pool_cost', nargs="?", type=non_negative_float, default=0.0,
+                        help='The minimum fixed fee that a pool must charge, regardless of the chosen cost. '
+                             'Default is 0.')
     parser.add_argument('--agent_activation_order', nargs="?", type=str.lower, default='random',
                         choices=['random', 'sequential', 'simultaneous', 'semisimultaneous'],
                         help='The order with which agents are activated. Default is "Random". Other options are '

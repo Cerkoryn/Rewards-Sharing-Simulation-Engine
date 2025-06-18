@@ -45,12 +45,15 @@ myopic ones and that the myopic ones will be (roughly) twice as many as the abst
 **--cost_min**: The lowest initial cost that a stakeholder can have (acts as the lower bound of the Uniform distribution 
 that cost values are drawn from). The default value is 10<sup>-5</sup>, but any non-negative real number is accepted. 
 ---
-**--cost_max**: The highest initial cost that a stakeholder can have (acts as the upper bound of the Uniform 
-distribution that cost values are drawn from). The default value is 10<sup>-4</sup>, but any non-negative real number > 
-**cost_min** is accepted. 
+**--cost_max**: The highest initial cost that a stakeholder can have (acts as the upper bound of the Uniform
+distribution that cost values are drawn from). The default value is 10<sup>-4</sup>, but any non-negative real number >
+**cost_min** is accepted.
 ---
-**extra_pool_cost_fraction**: When an agent operates one pool, then the cost of the pool is equal to the cost of the 
-agent. However, in our simulation it's possible for agents to operate multiple pools, so we assume that each additional 
+**--min_pool_cost**: The protocol-enforced minimum fixed fee that a stake pool must charge. Any pool cost lower than
+this value is automatically raised to match it. The default value is 0.
+---
+**extra_pool_cost_fraction**: When an agent operates one pool, then the cost of the pool is equal to the cost of the
+agent. However, in our simulation it's possible for agents to operate multiple pools, so we assume that each additional
 pool an agent operates costs a fraction of their initial cost, and that fraction is the same for all agents and dictated 
 by this argument. The default value is 0.4 (i.e. that a second pool costs 0.4 times as much as the first), but any 
 non-negative real number is accepted (if we assume economies of scale then this value must be < 1, but if we assume some 
