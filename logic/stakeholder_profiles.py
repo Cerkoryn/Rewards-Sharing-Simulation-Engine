@@ -31,8 +31,12 @@ class NonMyopicStakeholder(Stakeholder):
         )
 
         return hlp.calculate_operator_utility_from_pool(
-            pool_stake=non_myopic_pool_stake, pledge=pool.pledge, margin=pool.margin, cost=pool.cost,
-            reward_scheme=self.model.reward_scheme
+            pool_stake=non_myopic_pool_stake,
+            pledge=pool.pledge,
+            margin=pool.margin,
+            cost=pool.cost,
+            reward_scheme=self.model.reward_scheme,
+            min_pool_cost=self.model.min_pool_cost,
         )
 
     def calculate_delegator_utility_from_pool(self, pool, stake_allocation):
@@ -49,7 +53,13 @@ class NonMyopicStakeholder(Stakeholder):
             current_stake
         )
         return hlp.calculate_delegator_utility_from_pool(
-            stake_allocation, pool_stake, pool.pledge, pool.margin, pool.cost, self.model.reward_scheme
+            stake_allocation,
+            pool_stake,
+            pool.pledge,
+            pool.margin,
+            pool.cost,
+            self.model.reward_scheme,
+            min_pool_cost=self.model.min_pool_cost,
         )
 
     def calculate_margins_and_utility(self, num_pools):
@@ -106,8 +116,12 @@ class MyopicStakeholder(Stakeholder):
         utility = 0
         for pool in potential_pools:
             pool_utility = hlp.calculate_operator_utility_from_pool(
-                pool_stake=pool.stake, pledge=pool.pledge, margin=pool.margin, cost=pool.cost,
-                reward_scheme=self.model.reward_scheme
+                pool_stake=pool.stake,
+                pledge=pool.pledge,
+                margin=pool.margin,
+                cost=pool.cost,
+                reward_scheme=self.model.reward_scheme,
+                min_pool_cost=self.model.min_pool_cost,
             )
             utility += pool_utility
         return utility
@@ -117,7 +131,13 @@ class MyopicStakeholder(Stakeholder):
             if pool.id in self.strategy.stake_allocations else 0
         current_stake = pool.stake - previous_allocation_to_pool + stake_allocation
         return hlp.calculate_delegator_utility_from_pool(
-            stake_allocation, current_stake, pool.pledge, pool.margin, pool.cost, self.model.reward_scheme
+            stake_allocation,
+            current_stake,
+            pool.pledge,
+            pool.margin,
+            pool.cost,
+            self.model.reward_scheme,
+            min_pool_cost=self.model.min_pool_cost,
         )
 
     def calculate_margins_and_utility(self, num_pools):
@@ -159,8 +179,12 @@ class MyopicStakeholder(Stakeholder):
                 )
             )
             utility += hlp.calculate_operator_utility_from_pool(
-                pool_stake=pool_saturation_threshold, pledge=pledge_per_pool, margin=margins[-1],
-                cost=cost_per_pool, reward_scheme=self.model.reward_scheme
+                pool_stake=pool_saturation_threshold,
+                pledge=pledge_per_pool,
+                margin=margins[-1],
+                cost=cost_per_pool,
+                reward_scheme=self.model.reward_scheme,
+                min_pool_cost=self.model.min_pool_cost,
             )
         return margins, utility
 

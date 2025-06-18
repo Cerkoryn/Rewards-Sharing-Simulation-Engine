@@ -180,18 +180,27 @@ def calculate_pool_reward(reward_scheme, pool_stake, pool_pledge):
 
 
 @lru_cache(maxsize=1024)
-def calculate_delegator_reward_from_pool(pool_margin, pool_cost, pool_reward, delegator_stake_fraction):
+def calculate_delegator_reward_from_pool(
+    pool_margin, pool_cost, min_pool_cost, pool_reward, delegator_stake_fraction
+):
+    charged_cost = max(pool_cost, min_pool_cost)
+    reward_after_cost = pool_reward - charged_cost
+    if reward_after_cost <= 0:
+        return 0
     margin_factor = (1 - pool_margin) * delegator_stake_fraction
-    pool_profit = pool_reward - pool_cost
-    r_d = max(margin_factor * pool_profit, 0)
-    return r_d
+    return max(margin_factor * reward_after_cost, 0)
 
 
 @lru_cache(maxsize=1024)
-def calculate_operator_reward_from_pool(pool_margin, pool_cost, pool_reward, operator_stake_fraction):
+def calculate_operator_reward_from_pool(
+    pool_margin, pool_cost, min_pool_cost, pool_reward, operator_stake_fraction
+):
+    charged_cost = max(pool_cost, min_pool_cost)
+    reward_after_cost = pool_reward - charged_cost
+    if reward_after_cost <= 0:
+        return pool_reward - pool_cost
     margin_factor = pool_margin + ((1 - pool_margin) * operator_stake_fraction)
-    pool_profit = pool_reward - pool_cost
-    return pool_profit if pool_profit <= 0 else pool_profit * margin_factor
+    return reward_after_cost * margin_factor + (charged_cost - pool_cost)
 
 
 def calculate_non_myopic_pool_stake(pool, pool_rankings, reward_scheme, total_stake):
@@ -280,19 +289,31 @@ def calculate_myopic_pool_desirability(margin, current_profit):
 
 
 # @lru_cache(maxsize=1024)
-def calculate_operator_utility_from_pool(pool_stake, pledge, margin, cost, reward_scheme):
+def calculate_operator_utility_from_pool(pool_stake, pledge, margin, cost, reward_scheme, min_pool_cost=0):
     r = calculate_pool_reward(reward_scheme=reward_scheme, pool_stake=pool_stake, pool_pledge=pledge)
     stake_fraction = pledge / pool_stake
-    return calculate_operator_reward_from_pool(pool_margin=margin, pool_cost=cost, pool_reward=r,
-                                               operator_stake_fraction=stake_fraction)
+    return calculate_operator_reward_from_pool(
+        pool_margin=margin,
+        pool_cost=cost,
+        min_pool_cost=min_pool_cost,
+        pool_reward=r,
+        operator_stake_fraction=stake_fraction,
+    )
 
 
 # @lru_cache(maxsize=1024)
-def calculate_delegator_utility_from_pool(stake_allocation, pool_stake, pledge, margin, cost, reward_scheme):
+def calculate_delegator_utility_from_pool(
+    stake_allocation, pool_stake, pledge, margin, cost, reward_scheme, min_pool_cost=0
+):
     r = calculate_pool_reward(reward_scheme=reward_scheme, pool_stake=pool_stake, pool_pledge=pledge)
     stake_fraction = stake_allocation / pool_stake
-    return calculate_delegator_reward_from_pool(pool_margin=margin, pool_cost=cost, pool_reward=r,
-                                                delegator_stake_fraction=stake_fraction)
+    return calculate_delegator_reward_from_pool(
+        pool_margin=margin,
+        pool_cost=cost,
+        min_pool_cost=min_pool_cost,
+        pool_reward=r,
+        delegator_stake_fraction=stake_fraction,
+    )
 
 
 @lru_cache(maxsize=1024)
@@ -560,6 +581,8 @@ def add_script_arguments(parser):
     parser.add_argument('--extra_pool_cost_fraction', nargs="?", type=non_negative_float, default=0.4,
                         help='The factor that determines how much an additional pool costs as a fraction of '
                              'the original cost value of the stakeholder. Default is 40%%.')
+    parser.add_argument('--min_pool_cost', nargs="?", type=non_negative_float, default=0,
+                        help='The minimum fixed fee that pool operators must charge. Default is 0.')
     parser.add_argument('--agent_activation_order', nargs="?", type=str.lower, default='random',
                         choices=['random', 'sequential', 'simultaneous', 'semisimultaneous'],
                         help='The order with which agents are activated. Default is "Random". Other options are '
