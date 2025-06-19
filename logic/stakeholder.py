@@ -88,14 +88,23 @@ class Stakeholder(Agent):
         # Calculate current (not expected) utility of operating own pools
         for pool in self.strategy.owned_pools.values():
             utility += hlp.calculate_operator_utility_from_pool(
-                pool_stake=pool.stake, pledge=pool.pledge, margin=pool.margin, cost=pool.cost,
-                reward_scheme=self.model.reward_scheme
+                pool_stake=pool.stake,
+                pledge=pool.pledge,
+                margin=pool.margin,
+                cost=pool.cost,
+                reward_scheme=self.model.reward_scheme,
+                min_pool_cost=self.model.min_pool_cost,
             )
         for pool_id, allocation in self.strategy.stake_allocations.items():
             pool = self.model.pools[pool_id]
             utility += hlp.calculate_delegator_utility_from_pool(
-                stake_allocation=allocation, pool_stake=pool.stake, pledge=pool.pledge, margin=pool.margin,
-                cost=pool.cost, reward_scheme=self.model.reward_scheme
+                stake_allocation=allocation,
+                pool_stake=pool.stake,
+                pledge=pool.pledge,
+                margin=pool.margin,
+                cost=pool.cost,
+                reward_scheme=self.model.reward_scheme,
+                min_pool_cost=self.model.min_pool_cost,
             )
         return utility
 

@@ -11,6 +11,10 @@ def main():
     hlp.add_script_arguments(parser)
     args = parser.parse_args()
 
+    # --- convert min_pool_cost (given in ADA) to relative ---
+    min_pool_cost_rel = hlp.ada_to_relative(args.min_pool_cost)
+    # --------------------------------------------------------
+    
     sim = simulation.Simulation(
         n=args.n,
         k=args.k,
@@ -28,6 +32,7 @@ def main():
         cost_max=args.cost_max,
         extra_pool_cost_fraction=args.extra_pool_cost_fraction,
         agent_activation_order=args.agent_activation_order,
+        min_pool_cost=min_pool_cost_rel, 
         # total stake
         iterations_after_convergence=args.iterations_after_convergence,
         reward_scheme=args.reward_scheme,
