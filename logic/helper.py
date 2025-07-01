@@ -198,26 +198,23 @@ def calculate_pool_reward(reward_scheme, pool_stake, pool_pledge):
 
 @lru_cache(maxsize=1024)
 def calculate_delegator_reward_from_pool(
-    pool_margin, pool_cost, min_pool_cost, pool_reward, delegator_stake_fraction
+    pool_margin, pool_cost, min_pool_cost, pool_reward, delegator_stake_fraction # pool_cost is unused because operating costs are irrelevant to delgators
 ):
-    charged_cost = max(pool_cost, min_pool_cost)
-    reward_after_cost = pool_reward - charged_cost
-    if reward_after_cost <= 0:
-        return 0
-    margin_factor = (1 - pool_margin) * delegator_stake_fraction
-    return max(margin_factor * reward_after_cost, 0)
+    margin_factor = (1 - pool_margin) * delegator_stake_fraction  # Portion of pool profit for delegator after margin
+    reward_pot = pool_reward - min_pool_cost                      # Pool reward pot after subtracting min pool cost
+    r_d = max(margin_factor * reward_pot, 0)                      # Total delegator reward
+    return r_d                                                    
 
 
 @lru_cache(maxsize=1024)
 def calculate_operator_reward_from_pool(
     pool_margin, pool_cost, min_pool_cost, pool_reward, operator_stake_fraction
 ):
-    charged_cost = max(pool_cost, min_pool_cost)
-    reward_after_cost = pool_reward - charged_cost
-    if reward_after_cost <= 0:
-        return pool_reward - pool_cost
-    margin_factor = pool_margin + ((1 - pool_margin) * operator_stake_fraction)
-    return reward_after_cost * margin_factor + (charged_cost - pool_cost)
+    margin_factor = pool_margin + (1 - pool_margin) * operator_stake_fraction     # Operator's share of reward
+    pool_reward_after_fee = pool_reward - min_pool_cost                           # Pool reward after subtracting min pool cost
+    operator_variable_reward = margin_factor * pool_reward_after_fee              # Variable part of operator's reward
+    operator_total_reward = min_pool_cost + operator_variable_reward - pool_cost  # Total operator reward minus operating costs
+    return operator_total_reward                                  
 
 
 def calculate_non_myopic_pool_stake(pool, pool_rankings, reward_scheme, total_stake):
